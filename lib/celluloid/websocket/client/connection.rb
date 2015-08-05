@@ -11,11 +11,10 @@ module Celluloid
           @url = url
           uri = URI.parse(url)
           port = uri.port || (uri.scheme == "ws" ? 80 : 443)
+          @socket.close rescue nil
           @socket = Celluloid::IO::TCPSocket.new(uri.host, port)
-          if uri.scheme == "wss"
-            @socket = Celluloid::IO::SSLSocket.new(@socket)
-            @socket.connect
-          end
+          @socket = Celluloid::IO::SSLSocket.new(@socket) if port == 443
+          @socket.connect
           @client = ::WebSocket::Driver.client(self)
           @handler = handler
 
